@@ -42,16 +42,17 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500);
   rtc.begin();
 
-  Serial.begin(9600);
   aLastState = digitalRead(outputA);
 }
 
+int initial_pos;
 void loop() {
-
+  initial_pos = counter;
   Time t = rtc.getTime();
   hours = t.hour;
   minutes = t.min;
   seconds = t.sec;
+  
 
   if (digitalRead(change_hour) == LOW) {
     Serial.println(hours);
@@ -90,16 +91,24 @@ void loop() {
     } else {
       counter++;
     }
-    if (counter % 2 == 0)
-      mode += 1;
+    
+    // if (counter % 2 == 0)
+    //   mode += 1;
 
-    if(mode > 2) {
-      mode = 0;
-    }
-    Serial.print("Position: ");
-    Serial.println(counter);
+    // if(mode > 2) {
+    //   mode = 0;
+    // }
+    // Serial.print("Position: ");
+    // Serial.println(counter);
   }
+
   aLastState = aState;
+
+  if(counter != initial_pos)
+    if(mode >= 2)
+      mode = 0;
+    else
+      mode += 1;
 
   switch (mode) {
     case 0: simpleMode(); break;
@@ -134,8 +143,8 @@ void simpleMode() {
 
 void hystericalMode() {
   FastLED.clear();
-  for (int i = 4; i < 60; i++) {
-    for (int j = i - 4; j <= i; j++)
+  for (int i = 1; i < 60; i++) {
+    for (int j = i - 1; j <= i; j++)
       leds[(s_led + j) % 60] = CHSV(HUE_BLUE, 255, 255);
     leds[h_led] = CHSV((HUE_PURPLE) % 255, 255, 255);
     leds[m_led] = CHSV(HUE_YELLOW, 255, 255);
